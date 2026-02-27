@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         SSH_CRED = 'node-app-key'               // Jenkins credential ID
-        SERVER_IP = '54.67.84.65'          // Your Deploy EC2 IP
+        SERVER_IP = '172.31.21.127'          // Your Deploy EC2 IP
         REMOTE_USER = 'ubuntu'
         WEB_DIR = '/var/www/html/'
     }
@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Clone Repo') {
             steps {
-                git url: 'https://github.com/iamtruptimane/portfolio-app-deployment-CICD.git', branch: 'main'
+                git url: 'https://github.com/PremThakare27/portfolio-jenkins-app.git', branch: 'main'
             }
         }
 
@@ -25,7 +25,10 @@ pipeline {
                         echo "Uploading new files to /tmp on server..."
                         scp -r index.html css js fonts images ${REMOTE_USER}@${SERVER_IP}:/tmp/
 
-                        echo "Deploying files to Apache directory..."
+                        echo "Install and start Nginx server..."
+                        ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} "sudo apt update && sudo apt install nginx -y"
+
+                        echo "Deploying files to Nginx directory..."
                         ssh -o StrictHostKeyChecking=no ${REMOTE_USER}@${SERVER_IP} "sudo cp -r /tmp/index.html /tmp/css /tmp/js /tmp/fonts /tmp/images ${WEB_DIR}/"
                     '''
                 }
